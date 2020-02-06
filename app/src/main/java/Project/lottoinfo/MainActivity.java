@@ -78,17 +78,17 @@ public class MainActivity extends AppCompatActivity
 	int permissionCheck;
 
 	final String basicUrl = "https://www.nlotto.co.kr/common.do?method=getLottoNumber&drwNo=";
-	String finalUrl = "";
 	String lottoUri;
 
+	//activity_main
+	TextView dateText;
+	TextView latestRoundText;
 
-	String val1, val2, val3, val4, val5, val6, val7, fullNumber, latestDate;
-	TextView val1Text,val2Text, val3Text, val4Text, val5Text, val6Text, val7Text;
-	TextView latestNum;
+	String num1, num2, num3, num4, num5, num6, num7, latestDate;
+	TextView num1Text,num2Text, num3Text, num4Text, num5Text, num6Text, num7Text;
 	TextView showDBtext;
 	EditText searchText;
 	ImageView refresh;
-	TextView dateText;
 
 	/////정리 뷰
 	ImageView top_list_Image;
@@ -99,23 +99,10 @@ public class MainActivity extends AppCompatActivity
 	Handler mHandler = null;
 
 	LottoDataBaseManager lottoDBManager;
-	int roundDB = 0;//회차
-	String[] alphaDB = null;//줄
-	String[] resultDB = null;//당첨 여부
-	String[][] numbersDB = null;//숫자
 
 	Intent intentToQR;
 
-	private ArrayList<LottoInfo> mLottoList;
-	private LottoAdapter mAdapter;
-
-	private LayoutInflater mInflater;
-	private ConstraintLayout mRootLinear;
-	private ConstraintLayout container;
-
 	private int latestRound;
-
-	private LottoInfo latestLotto;
 
 	private AdView adView;
 
@@ -123,7 +110,6 @@ public class MainActivity extends AppCompatActivity
 
 
 	private RecyclerView mRecyclerView;
-	private ArrayList<LottoInfo> mmLottoList;
 	private LottoAdapter mmAdapter;
 
 	@Override
@@ -157,15 +143,15 @@ public class MainActivity extends AppCompatActivity
 
 		mHandler = new Handler();
 
-		val1Text = findViewById(R.id.val1Text);
-		val2Text = findViewById(R.id.val2Text);
-		val3Text = findViewById(R.id.val3Text);
-		val4Text = findViewById(R.id.val4Text);
-		val5Text = findViewById(R.id.val5Text);
-		val6Text = findViewById(R.id.val6Text);
-		val7Text = findViewById(R.id.val7Text);
+		num1Text = findViewById(R.id.num1Text);
+		num2Text = findViewById(R.id.num2Text);
+		num3Text = findViewById(R.id.num3Text);
+		num4Text = findViewById(R.id.num4Text);
+		num5Text = findViewById(R.id.num5Text);
+		num6Text = findViewById(R.id.num6Text);
+		num7Text = findViewById(R.id.num7Text);
 
-		latestNum = findViewById(R.id.latestNum);
+		latestRoundText = findViewById(R.id.latestRoundText);
 		dateText = findViewById(R.id.dateText);
 
 		intentToQR = new Intent(this, ShowQRResult.class);
@@ -323,7 +309,7 @@ public class MainActivity extends AppCompatActivity
 				qrBtnClick();
 				break;
 			case R.id.refreshImage:
-			case R.id.latestNum:
+			case R.id.latestRoundText:
 				showMyLatestLotto();
 				textClick();
 				break;
@@ -380,35 +366,26 @@ public class MainActivity extends AppCompatActivity
 					//Toast.makeText(getApplicationContext(), json, Toast.LENGTH_SHORT).show();
 
 					JSONObject jsonObject = new JSONObject(json);
-					if(jsonObject != null)
-					{
-						//Toast.makeText(getApplicationContext(), "json", Toast.LENGTH_SHORT).show();
-					}
-					else
-					{
-						//Toast.makeText(getApplicationContext(), "no json", Toast.LENGTH_SHORT).show();
-					}
 					if(jsonObject.getString("returnValue").equals("fail"))
 					{
-						val1 = "x";
-						val2 = "x";
-						val3 = "x";
-						val4 = "x";
-						val5 = "x";
-						val6 = "x";
-						val7 = "x";
+						num1 = "x";
+						num2 = "x";
+						num3 = "x";
+						num4 = "x";
+						num5 = "x";
+						num6 = "x";
+						num7 = "x";
 						latestDate = "x";
 					}
 					else {
-						val1 = jsonObject.getString("drwtNo1");
-						val2 = jsonObject.getString("drwtNo2");
-						val3 = jsonObject.getString("drwtNo3");
-						val4 = jsonObject.getString("drwtNo4");
-						val5 = jsonObject.getString("drwtNo5");
-						val6 = jsonObject.getString("drwtNo6");
-						val7 = jsonObject.getString("bnusNo");
+						num1 = jsonObject.getString("drwtNo1");
+						num2 = jsonObject.getString("drwtNo2");
+						num3 = jsonObject.getString("drwtNo3");
+						num4 = jsonObject.getString("drwtNo4");
+						num5 = jsonObject.getString("drwtNo5");
+						num6 = jsonObject.getString("drwtNo6");
+						num7 = jsonObject.getString("bnusNo");
 						latestDate = jsonObject.getString("drwNoDate");
-						fullNumber = val1 + val2 + val3 + val4 + val5 + val6 + "+" + val7;
 					}
 
 					mHandler.post(new Runnable()
@@ -416,13 +393,13 @@ public class MainActivity extends AppCompatActivity
 						@Override
 						public void run()
 						{
-							val1Text.setText(val1);
-							val2Text.setText(val2);
-							val3Text.setText(val3);
-							val4Text.setText(val4);
-							val5Text.setText(val5);
-							val6Text.setText(val6);
-							val7Text.setText(val7);
+							num1Text.setText(num1);
+							num2Text.setText(num2);
+							num3Text.setText(num3);
+							num4Text.setText(num4);
+							num5Text.setText(num5);
+							num6Text.setText(num6);
+							num7Text.setText(num7);
 							dateText.setText(latestDate);
 						}
 					});
@@ -483,7 +460,7 @@ public class MainActivity extends AppCompatActivity
 					@Override
 					public void run()
 					{
-						latestNum.setText(calDateDays+"");
+						latestRoundText.setText(calDateDays+"");
 					}
 				});
 				Looper.loop();
@@ -519,8 +496,6 @@ public class MainActivity extends AppCompatActivity
 				}
 			}
 		}
-
-		//showMyLatestLotto();//내가 가진 로또 중 가장 최근의 로또 보여줄거야
 	}
 
 	private void showMyLatestLotto()
@@ -555,81 +530,6 @@ public class MainActivity extends AppCompatActivity
 			}
 		}
 	}
-
-	/*
-	private void showMyLatestLotto()
-	{
-		Log.i("check", "main showMyLatestLotto()");
-		String [] columns = new String[]{"round, alpha, result, numbers, hit"};
-		Cursor cursor = lottoDBManager.query(columns, null, null, null, null, null);
-		if(cursor.moveToLast())//디비가 비어있지 않으면
-		{
-			latestLotto = new LottoInfo();
-			latestLotto.set_round(cursor.getInt(0));
-			latestLotto.set_alpha(cursor.getString(1));
-			latestLotto.set_result(cursor.getString(2));
-			latestLotto.set_numbers(cursor.getString(3));
-			latestLotto.set_hit(cursor.getString(4));
-			mHandler.post(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					TextView c = findViewById(R.id.checkText);
-					c.setText(latestLotto.get_sum_hit());
-
-					mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-					ConstraintLayout container = findViewById(R.id.testLayout);
-					container.removeAllViews();
-					mInflater.inflate(R.layout.my_lotto_item, container, true);
-
-					TextView round = container.findViewById(R.id.my_lotto_round);
-					round.setText(latestLotto.get_round() + "");
-
-					LinearLayout rowLayout = container.findViewById(R.id.my_lotto_rowA);
-					for(int i = 0 ; i < latestLotto.get_len() ; i++)
-					{
-						//layout
-						rowLayout = container.findViewById(R.id.my_lotto_rowA + i*15);
-						rowLayout.setVisibility(View.VISIBLE);
-						//row
-						round = container.findViewById(R.id.my_lotto_rowA_alpha + i*15);
-						round.setText(latestLotto.get_row_alpha(i));
-
-						//result
-						round = container.findViewById(R.id.my_lotto_rowA_result + i*15);
-						round.setText(latestLotto.get_row_result(i));
-
-						//number, hit
-						for(int j = 0 ; j < 6 ; j++)
-						{
-							round = container.findViewById(R.id.my_lotto_rowA_num1_text + i*15 + j*2);
-							round.setText(latestLotto.get_number(i, j) + "");//바꿔야함 -> number
-							if(latestLotto.get_hit(i, j) == 1)
-							{
-								ImageView image = container.findViewById(R.id.my_lotto_rowA_num1_image + i*15 + j*2);
-								image.setImageResource(R.drawable.my_yellow_oval);
-							}
-						}
-					}
-				}
-			});
-		}
-		else//디비가 비어있으면
-		{
-			mHandler.post(new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-					ConstraintLayout container = findViewById(R.id.testLayout);
-					container.removeAllViews();
-				}
-			});
-		}
-	}
-	 */
 
 	//다른 액티비티 부르고 난 후 결과
 	@Override
@@ -743,17 +643,6 @@ public class MainActivity extends AppCompatActivity
 		}
 		showDBtext.setText(sb);
 		keyboard.hideSoftInputFromWindow(searchText.getWindowToken(), 0);
-		/*
-		if(sb.length() != 0)
-		{
-			showDBtext.setText(sb);
-		}
-		else
-		{
-			showDBtext.setText("892 없음");
-		}
-
-		 */
 	}
 
 	//DB에 있는 자료들 찾아줘

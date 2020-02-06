@@ -35,7 +35,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/latestNum"
+            android:id="@+id/latestRoundText"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:autoSizeTextType="uniform"
@@ -48,50 +48,50 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/numberLayout"
+            android:id="@+id/topLayout_lottoNumberLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/latestNum"
+            app:layout_constraintTop_toBottomOf="@+id/latestRoundText"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent">
             <FrameLayout
-                android:id="@+id/val1Layout"
+                android:id="@+id/num1Layout"
                 style="@style/myFrameLayout"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/val2Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num2Layout"
                 app:layout_constraintTop_toTopOf="parent">
                 <ImageView
-                    android:id="@+id/val1Image"
+                    android:id="@+id/num1Image"
                     style="@style/myImageView"
                     android:src="@drawable/my_yellow_oval" />
                 <TextView
-                    android:id="@+id/val1Text"
+                    android:id="@+id/num1Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
                     android:autoSizeTextType="uniform"
                     android:gravity="center"
-                    android:text="여기"
                     android:textColor="@color/myBlack2"/>
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/val2Layout"
+                android:id="@+id/num2Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val1Layout"
-                app:layout_constraintRight_toLeftOf="@+id/val3Layout"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num1Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num3Layout"
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val2Image"
+                    android:id="@+id/num2Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_yellow_oval" />
 
                 <TextView
-                    android:id="@+id/val2Text"
+                    android:id="@+id/num2Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
@@ -100,21 +100,21 @@
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/val3Layout"
+                android:id="@+id/num3Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val2Layout"
-                app:layout_constraintRight_toLeftOf="@+id/val4Layout"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num2Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num4Layout"
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val3Image"
+                    android:id="@+id/num3Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_blue_oval" />
 
                 <TextView
-                    android:id="@+id/val3Text"
+                    android:id="@+id/num3Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
@@ -123,21 +123,21 @@
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/val4Layout"
+                android:id="@+id/num4Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val3Layout"
-                app:layout_constraintRight_toLeftOf="@+id/val5Layout"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num3Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num5Layout"
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val4Image"
+                    android:id="@+id/num4Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_blue_oval" />
 
                 <TextView
-                    android:id="@+id/val4Text"
+                    android:id="@+id/num4Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autoSizeTextType="uniform"
@@ -145,21 +145,21 @@
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/val5Layout"
+                android:id="@+id/num5Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val4Layout"
-                app:layout_constraintRight_toLeftOf="@+id/val6Layout"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num4Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num6Layout"
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val5Image"
+                    android:id="@+id/num5Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_red_oval" />
 
                 <TextView
-                    android:id="@+id/val5Text"
+                    android:id="@+id/num5Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
@@ -168,21 +168,21 @@
             </FrameLayout>
 
             <FrameLayout
-                android:id="@+id/val6Layout"
+                android:id="@+id/num6Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val5Layout"
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num5Layout"
                 app:layout_constraintRight_toLeftOf="@+id/plusView"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val6Image"
+                    android:id="@+id/num6Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_red_oval" />
 
                 <TextView
-                    android:id="@+id/val6Text"
+                    android:id="@+id/num6Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
@@ -196,29 +196,29 @@
                 android:layout_height="0dp"
                 android:gravity="center"
                 android:text="+"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
-                app:layout_constraintLeft_toRightOf="@+id/val6Layout"
-                app:layout_constraintRight_toLeftOf="@+id/val7Layout"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout"
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
+                app:layout_constraintLeft_toRightOf="@+id/num6Layout"
+                app:layout_constraintRight_toLeftOf="@+id/num7Layout"
+                app:layout_constraintTop_toTopOf="@+id/num1Layout"
                 app:layout_constraintWidth_default="percent"
                 app:layout_constraintWidth_percent="0.09" />
 
             <FrameLayout
-                android:id="@+id/val7Layout"
+                android:id="@+id/num7Layout"
                 style="@style/myFrameLayout"
-                app:layout_constraintBottom_toBottomOf="@+id/val1Layout"
+                app:layout_constraintBottom_toBottomOf="@+id/num1Layout"
                 app:layout_constraintLeft_toRightOf="@+id/plusView"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/val1Layout">
+                app:layout_constraintTop_toTopOf="@+id/num1Layout">
 
                 <ImageView
-                    android:id="@+id/val7Image"
+                    android:id="@+id/num7Image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@drawable/my_black_oval" />
 
                 <TextView
-                    android:id="@+id/val7Text"
+                    android:id="@+id/num7Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
@@ -231,7 +231,7 @@
             android:id="@+id/buttonLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@id/numberLayout"
+            app:layout_constraintTop_toBottomOf="@id/topLayout_lottoNumberLayout"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
