@@ -25,14 +25,7 @@ public class LottoInfo implements Serializable
 		round = 0;
 	}
 
-	public LottoInfo(int round, String alpha, String result, String numbers)
-	{
-		this.round = round;
-		set_alpha(alpha);
-		set_result(result);
-		set_numbers(numbers);
-	}
-
+	//set 함수는 db / 웹 에서 받아와서 하나로 이어진 문장을 받고 (쪼개서) 입력
 	public void set_id(String id) { this.id = id; }
 
 	public void set_round(int round) { this.round = round; }
@@ -50,7 +43,32 @@ public class LottoInfo implements Serializable
 
 	public void set_numbers(String numbers)
 	{
-		splitNumber(numbers);
+		this.numbers = splitNumber(numbers);
+	}
+
+	//1234q1234q1234 => 12 34 / 12 34 / 12 34
+	private String[][] splitNumber(String n)
+	{
+		Log.i("check", "LottoInfo :" + n);
+		int i = 0 , j = 0;
+		String[] tmpRow = n.split("q");
+		String[][] tmp = new String[this.len][6];
+		for(i = 0 ; i < this.len ; i ++)
+		{
+			for(j = 0 ; j < 6; j++)
+			{
+				if(j==5)
+				{
+					tmp[i][j] = tmpRow[i].substring(j*2);
+				}
+				else
+				{
+					tmp[i][j] = tmpRow[i].substring(j*2, (j + 1)*2);
+				}
+			}
+		}
+
+		return tmp;
 	}
 
 	public void set_hit(String h)
@@ -69,43 +87,30 @@ public class LottoInfo implements Serializable
 		}
 	}
 
-	private void splitNumber(String n)
-	{
-		int i = 0 , j = 0;
-		String[] tmpN = n.split("q");
-		this.numbers = new String[this.len][6];
-		for(i = 0 ; i < this.len ; i ++)
-		{
-			for(j = 0 ; j < 6; j++)
-			{
-				if(j==5)
-				{
-					this.numbers[i][j] = tmpN[i].substring(j*2);
-				}
-				else
-				{
-					this.numbers[i][j] = tmpN[i].substring(j*2, (j + 1)*2);
-				}
-			}
-		}
-	}
-
 	public String get_id() { return this.id; }
 
 	public int get_round()	{ return this.round; }
 
 	public int get_len() { return this.len; }
 
+	public int get_hit(int i, int j)
+	{
+		return this.hit[i][j];
+	}
+
+	//A / B / C / D / E
 	public String get_row_alpha(int i)
 	{
 		return this.alpha[i];
 	}
 
+	//낙첨 / 낙첨 / 낙첨 / 낙첨 / 낙첨
 	public String get_row_result(int i)
 	{
 		return this.result[i];
 	}
 
+	// 1234 / 1234 / 1234 / 1234 / 1234
 	public String get_row_number(int i)
 	{
 		StringBuffer tmp = new StringBuffer();
@@ -116,12 +121,13 @@ public class LottoInfo implements Serializable
 		return tmp.toString();
 	}
 
+	// 12 34 / 12 34 / 12 34 / 12 34 / 12 34
 	public String get_number(int i, int j)
 	{
 		return this.numbers[i][j];
 	}
 
-	//한줄로 합한 녀석이 필요할 때
+	//한줄로 합한 녀석이 필요할 때 _sum 붙여
 	public String get_sum_alpha() { return sumN(this.alpha); }
 
 	public String get_sum_result() { return sumN(this.result); }
@@ -131,7 +137,8 @@ public class LottoInfo implements Serializable
 		String[] tmp = new String[this.len];
 		for(int i = 0 ; i < this.len ; i++)
 		{
-			for(int j = 0; j < 6 ; j++)
+			tmp[i] = get_row_number(i);
+			/*for(int j = 0; j < 6 ; j++)
 			{
 				if(j==0)
 				{
@@ -141,9 +148,23 @@ public class LottoInfo implements Serializable
 				{
 					tmp[i] += this.numbers[i][j];
 				}
-			}
+			}삭제*/
 		}
 		return sumN(tmp);
+	}
+
+	private String sumN(String[] s)
+	{
+		StringBuilder sum = new StringBuilder();
+		for(int i = 0 ; i < this.len ; i++)
+		{
+			sum.append(s[i]);
+			if(i != this.len -1)
+			{
+				sum.append("q");
+			}
+		}
+		return sum.toString();
 	}
 
 	public String get_sum_hit()
@@ -159,21 +180,7 @@ public class LottoInfo implements Serializable
 				}
 			}
 		}
+		sb = sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
-	}
-
-	private String sumN(String[] s)
-	{
-		StringBuilder sum = new StringBuilder();
-		for(int i = 0 ; i < this.len ; i++)
-		{
-			sum.append(s[i]).append("q");
-		}
-		return sum.toString();
-	}
-
-	public int get_hit(int i, int j)
-	{
-		return this.hit[i][j];
 	}
 }

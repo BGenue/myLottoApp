@@ -24,7 +24,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -134,6 +133,62 @@ public class MainActivity extends AppCompatActivity
 		lottoDBManager = LottoDataBaseManager.getInstance(this);
 		initId();
 		getLatestLotto();//최신 로또 답 가져와 -> 내 디비에서 최근 로또 확인 -> 업데이트 필요하면 하고 아니면 그냥 보여줘
+
+		////삭제할 부분
+		//지금 저장 되어 있는 db 체크
+		showMyDB();
+	}
+
+	private void showMyDB()
+	{
+		ContentValues updateRowValue = new ContentValues();
+		String [] columns = new String[]{"id, round, alpha, result, numbers, hit"};
+		LottoInfo show = new LottoInfo();
+		Cursor cursor = lottoDBManager.query(columns, null, null, null, null, null);
+		Log.i("check", "main onCreate() showMyDB() before change");
+		while(cursor.moveToNext())
+		{
+			if(cursor != null)
+			{
+				Log.i("check", "main onCreate() showMyDB() id : " + cursor.getString(0));
+				Log.i("check", "main onCreate() showMyDB() round : " + cursor.getInt(1));
+				Log.i("check", "main onCreate() showMyDB() alpha : " + cursor.getString(2));
+				Log.i("check", "main onCreate() showMyDB() result : " + cursor.getString(3));
+				Log.i("check", "main onCreate() showMyDB() numbers : " + cursor.getString(4));
+				Log.i("check", "main onCreate() showMyDB() hit : " + cursor.getString(5));
+
+				//맨 마지막 q 없애
+				/*
+				show.set_id(cursor.getString(0));
+				show.set_round(cursor.getInt(1));
+				show.set_alpha(cursor.getString(2));
+				show.set_result(cursor.getString(3));
+				show.set_numbers(cursor.getString(4));
+				show.set_hit(cursor.getString(5));
+				updateRowValue.put("id", show.get_id());
+				updateRowValue.put("round", show.get_round());
+				updateRowValue.put("alpha", show.get_sum_alpha());
+				updateRowValue.put("result", show.get_sum_result());
+				updateRowValue.put("numbers", show.get_sum_numbers());
+				updateRowValue.put("hit", show.get_sum_hit());
+				lottoDBManager.update(updateRowValue, "id=?", new String[]{cursor.getString(0)});*/
+			}
+		}
+		/*
+		Log.i("check", "main onCreate() showMyDB() after change");
+		cursor = lottoDBManager.query(columns, null, null, null, null, null);
+		while(cursor.moveToNext())
+		{
+			if(cursor != null)
+			{
+				Log.i("check", "main onCreate() showMyDB() id : " + cursor.getString(0));
+				Log.i("check", "main onCreate() showMyDB() round : " + cursor.getInt(1));
+				Log.i("check", "main onCreate() showMyDB() alpha : " + cursor.getString(2));
+				Log.i("check", "main onCreate() showMyDB() result : " + cursor.getString(3));
+				Log.i("check", "main onCreate() showMyDB() numbers : " + cursor.getString(4));
+				Log.i("check", "main onCreate() showMyDB() hit : " + cursor.getString(5));
+			}
+		}*/
 	}
 
 	private void initId()
@@ -567,8 +622,6 @@ public class MainActivity extends AppCompatActivity
 						insertDB(tmp);
 						//getLottoData();
 						showDB();
-						TextView tttt = findViewById(R.id.checkText);//삭제
-						tttt.setText(lottoUri);
 					}
 					break;
 				case SHOW_DB:
@@ -610,8 +663,6 @@ public class MainActivity extends AppCompatActivity
 		updateRowValue.put("result", updateLotto.get_sum_result());
 		updateRowValue.put("hit", updateLotto.get_sum_hit());
 		updateRowValue.put("numbers", updateLotto.get_sum_numbers());
-		TextView check = findViewById(R.id.checkText);//삭제
-		check.setText(updateLotto.get_sum_hit());
 		lottoDBManager.update(updateRowValue, "id=?", new String[]{updateLotto.get_id()});
 	}
 
@@ -685,8 +736,7 @@ public class MainActivity extends AppCompatActivity
 
 		private int tmpRound;
 		private int mode = 0;
-		ArrayList<String> check;//삭제
-		private String dateS;//삭제
+
 		//로또 번호 저장
 		private LottoInfo myLotto;
 
@@ -696,6 +746,7 @@ public class MainActivity extends AppCompatActivity
 		//기본 jsoup
 		public JsoupParse(String u)
 		{
+			Log.i("check", "JsoupParse String");
 			this.mode = 0;
 			this.findUri = u;
 			Log.i("check", "onPostExecute uri :" + u);
@@ -706,8 +757,12 @@ public class MainActivity extends AppCompatActivity
 		//내가 원하는 round를 검색하고 싶을때
 		public JsoupParse(LottoInfo lotto)
 		{
+			Log.i("check", "JsoupParse LottoInfo");
 			this.mode = 1;
 			this.myLotto = lotto;
+			Log.i("check", "JsoupParse LottoInfo round : " + this.myLotto.get_round());
+			Log.i("check", "JsoupParse LottoInfo numbers : " + this.myLotto.get_sum_numbers());
+			Log.i("check", "JsoupParse LottoInfo id : " + this.myLotto.get_id());
 			this.findUri = baseUri + "0" + this.myLotto.get_round() + "q" + this.myLotto.get_sum_numbers() + this.myLotto.get_id();
 			sbID.append(lotto.get_id());
 		}
@@ -720,10 +775,10 @@ public class MainActivity extends AppCompatActivity
 			myLotto = new LottoInfo();
 			myLotto.set_id(sbID.toString());
 			myLotto.set_round(tmpRound);//892
-			myLotto.set_alpha(sbAlpha.toString());//AnBnCnDnEn
-			myLotto.set_result(sbResult.toString());//낙첨n낙첨n낙첨n낙첨n낙첨n
-			myLotto.set_numbers(sbNum.toString());//q12341234134q12412341234q1241241234q1241241234q123412341234q1234123434
-			myLotto.set_hit(sbHit.toString());//1,2n3,4n
+			myLotto.set_alpha(sbAlpha.toString());//AnBnCnDnE
+			myLotto.set_result(sbResult.toString());//낙첨n낙첨n낙첨n낙첨n낙첨
+			myLotto.set_numbers(sbNum.toString());//12341234134q12412341234q1241241234q1241241234q123412341234q1234123434
+			myLotto.set_hit(sbHit.toString());//1,2n3,4
 
 			if(this.mode == 0)
 			{
@@ -789,6 +844,7 @@ public class MainActivity extends AppCompatActivity
 						}
 						if(num.className().contains("clr1")||num.className().contains("clr2")||num.className().contains("clr3")||num.className().contains("clr4")||num.className().contains("clr5"))
 						{
+							//맞춘 자리 체크
 							sbHit.append(c+","+r).append("q");
 						}
 						r++;
@@ -799,7 +855,11 @@ public class MainActivity extends AppCompatActivity
 					c++;
 				}
 			}catch(IOException e){
+				Log.i("check", "doInBackground catch : " + e.toString());
 			}
+			Log.i("check", "onPostExecute sbAlpha :" + sbAlpha.toString());
+			Log.i("check", "onPostExecute sbResult :" + sbResult.toString());
+			Log.i("check", "onPostExecute sbNum :" + sbNum.toString());
 			return null;
 		}
 	}
