@@ -32,7 +32,6 @@ public class LottoDataBaseManager implements Serializable
 	}
 
 	private LottoDataBaseManager(Context context)
-	//public LottoDataBaseManager(Context context)
 	{
 		myContext = context;
 
@@ -55,7 +54,8 @@ public class LottoDataBaseManager implements Serializable
 				"alpha TEXT," +
 				"result TEXT," +
 				"numbers TEXT," +
-				"hit TEXT);");
+				"hit TEXT," +
+				"qORm TEST);");
 	}
 
 	public void reset()
@@ -65,9 +65,29 @@ public class LottoDataBaseManager implements Serializable
 		create();
 	}
 
+	public Cursor ascendDB()
+	{
+		//낮은 횟수부터 보여줘
+		Log.i("check", "LottoDateBaseManager  ascendDB");
+		String[] columns = new String[]{"round, id, alpha, result, numbers, hit"};
+		Cursor acsendCursor = lottoDBManager.query(columns, null, null, null, null, "round asc");
+		return acsendCursor;
+	}
+
+	public Cursor descendDB()
+	{
+		//높은 횟수부터 보여줘
+		Log.i("check", "LottoDateBaseManager  ascendDB");
+		String[] columns = new String[]{"round, id, alpha, result, numbers, hit"};
+		Cursor descendCursor = lottoDBManager.query(columns, null, null, null, null, "round desc");
+		return descendCursor;
+	}
+
 	public long insert(ContentValues addRowValue)
 	{
 		Log.i("check", "LottoDateBaseManager insert");
+		//새로운 로또 입력 시 디비 정리해줘
+
 		return lottoDB.insert(LOTTO_INFO_TABLE, null, addRowValue);
 	}
 

@@ -26,7 +26,10 @@ public class MyInfoActivity extends AppCompatActivity
 	final static int RESULT_OK = 1;
 	final static int SHOW_DB = 3;
 
+	static int sort;
+
 	private RecyclerView mRecyclerView;
+	private Button sortButton;
 	private ArrayList<LottoInfo> mLottoList;
 	private LottoAdapter mAdapter;
 	private int count = -1;
@@ -53,7 +56,11 @@ public class MyInfoActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.my_info_activity);
 
+		sort = 0;//0이면 기본 오름차순
+
 		tete = findViewById(R.id.tete);
+		sortButton = findViewById(R.id.sortBtn);
+		deleteBtn = findViewById(R.id.deleteBtn);
 
 		mRecyclerView = findViewById(R.id.myRecycle);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -119,13 +126,14 @@ public class MyInfoActivity extends AppCompatActivity
 		mRecyclerView.addItemDecoration(dividerItemDecoration);
 
 		//main에서 보낸 intent에서 db 가져와
-		intentFromMain = getIntent();//삭제 혹은 수정
+		intentFromMain = getIntent();//삭제
 		//lottoDBManager = (LottoDataBaseManager) intentFromMain.getSerializableExtra("db");
 		lottoDBManager = LottoDataBaseManager.getInstance(this);
 		if(lottoDBManager != null) {
-			Toast.makeText(getApplicationContext(), "디비 만들어짐", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "디비 만들어짐", Toast.LENGTH_SHORT).show();//삭제할 거
 		}
 
+		//삭제할 부분
 		StringBuffer sb = new StringBuffer();
 		String[] columns = new String[] {"round"};
 		Cursor cursor = lottoDBManager.query(columns, null, null, null, null, null);
@@ -135,18 +143,28 @@ public class MyInfoActivity extends AppCompatActivity
 			}
 		}
 		Toast.makeText(getApplicationContext(), sb.toString(), Toast.LENGTH_SHORT).show();
+		//
+
 		showDB();
 
-		deleteBtn = findViewById(R.id.deleteBtn);
 
-		tete.setText(lottoDBManager.get_numb()+"");
+		tete.setText(lottoDBManager.get_numb()+"");//삭제할 놈
 	}
 
 	private void showDB()
 	{
-		Log.i("check", "myInfo showDB()");
-		String [] columns = new String[]{"id, round, alpha, result, numbers, hit"};
-		Cursor cursor = lottoDBManager.query(columns, null, null, null, null, null);
+		Log.i("check", "myInfo showDB() sort " + sort);
+		String [] columns = new String[]{"id, round, alpha, result, numbers, hit, qORm"};
+		Cursor cursor;
+
+		if(sort == 0)
+		{
+			cursor = lottoDBManager.query(columns, null, null, null, null, "round asc");
+		}
+		else
+		{
+			cursor = lottoDBManager.query(columns, null, null, null, null, "round desc");
+		}
 		while(cursor.moveToNext())
 		{
 			if(cursor != null)
@@ -158,6 +176,7 @@ public class MyInfoActivity extends AppCompatActivity
 				tmpLotto.set_result(cursor.getString(3));
 				tmpLotto.set_numbers(cursor.getString(4));
 				tmpLotto.set_hit(cursor.getString(5));
+				tmpLotto.set_qORm(cursor.getString(6));
 				mLottoList.add(tmpLotto);
 				mAdapter.notifyDataSetChanged();
 			}
@@ -196,9 +215,28 @@ public class MyInfoActivity extends AppCompatActivity
 
 	private void resetDB()
 	{
+		Log.i("check", "MyInfoActivity resetDB()");
 		lottoDBManager.reset();
 		mLottoList.clear();
 		mAdapter.notifyDataSetChanged();
+}
+
+	private void sortShow()
+	{
+		if(sort == 0)
+		{
+			sort = 1;
+			sortButton.setText("내림차순");
+		}
+		else
+		{
+			sort = 0;
+			sortButton.setText("오름차순");
+		}
+		Log.i("check", "MyInfoActivity sortShow() sort " + sort);
+		mLottoList.clear();
+		mAdapter.notifyDataSetChanged();
+		showDB();
 	}
 
 	public void clickHandler(View v)
@@ -214,6 +252,9 @@ public class MyInfoActivity extends AppCompatActivity
 				break;
 			case R.id.resetBtn:
 				resetDB();
+				break;
+			case R.id.sortBtn:
+				sortShow();
 				break;
 		}
 	}

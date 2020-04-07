@@ -14,15 +14,19 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,6 +73,15 @@ public class MainActivity extends AppCompatActivity
 	final static int RESULT_OK = 1;
 	final static int INSERT_DB = 2;
 	final static int SHOW_DB = 3;
+	final static int SHOW_MAP = 6666;
+	private final static int LAST_STATE_SAVE = 4563;
+
+	//MapActivity에서 저장할 요소들 관련
+	//마지막 권한 설정 상태 와 마지막 위치 저장해둬
+	private final static String KEY_PERMISSION = "permission";
+	private final static String KEY_LOCATION = "location";
+	private boolean permission_granted;
+	private Location currentLocation;
 
 	//스캔 결과
 	private IntentResult result;
@@ -87,7 +101,7 @@ public class MainActivity extends AppCompatActivity
 	TextView num1Text,num2Text, num3Text, num4Text, num5Text, num6Text, num7Text;
 	TextView showDBtext;
 	EditText searchText;
-	ImageView refresh;
+	ImageView gps;
 
 	/////정리 뷰
 	ImageView top_list_Image;
@@ -97,9 +111,10 @@ public class MainActivity extends AppCompatActivity
 
 	Handler mHandler = null;
 
-	LottoDataBaseManager lottoDBManager;
+	private LottoDataBaseManager lottoDBManager;
 
-	Intent intentToQR;
+	private Intent intentToQR;
+	private Intent intentToMap;
 
 	private int latestRound;
 
@@ -118,6 +133,9 @@ public class MainActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		//updateValuesFromBundle(savedInstanceState);
+
+		//광고
 		adView = findViewById(R.id.adView);
 		MobileAds.initialize(this, new OnInitializationCompleteListener()
 		{
@@ -130,13 +148,34 @@ public class MainActivity extends AppCompatActivity
 		AdRequest adRequest = new AdRequest.Builder().build();
 		adView.loadAd(adRequest);
 
+		//db
 		lottoDBManager = LottoDataBaseManager.getInstance(this);
+
 		initId();
+
 		getLatestLotto();//최신 로또 답 가져와 -> 내 디비에서 최근 로또 확인 -> 업데이트 필요하면 하고 아니면 그냥 보여줘
 
 		////삭제할 부분
 		//지금 저장 되어 있는 db 체크
 		showMyDB();
+
+		getAppKeyHash();
+	}
+
+	//뭐지 이건
+	private void getAppKeyHash() {
+		try {
+			PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
+			for (Signature signature : info.signatures) {
+				MessageDigest md;
+				md = MessageDigest.getInstance("SHA");
+				md.update(signature.toByteArray());
+				String something = new String(Base64.encode(md.digest(), 0));
+				Log.i("check", "hash " + something);
+			}
+		} catch (Exception e) {
+			Log.e("name not found", e.toString());
+		}
 	}
 
 	private void showMyDB()
@@ -156,39 +195,8 @@ public class MainActivity extends AppCompatActivity
 				Log.i("check", "main onCreate() showMyDB() result : " + cursor.getString(3));
 				Log.i("check", "main onCreate() showMyDB() numbers : " + cursor.getString(4));
 				Log.i("check", "main onCreate() showMyDB() hit : " + cursor.getString(5));
-
-				//맨 마지막 q 없애
-				/*
-				show.set_id(cursor.getString(0));
-				show.set_round(cursor.getInt(1));
-				show.set_alpha(cursor.getString(2));
-				show.set_result(cursor.getString(3));
-				show.set_numbers(cursor.getString(4));
-				show.set_hit(cursor.getString(5));
-				updateRowValue.put("id", show.get_id());
-				updateRowValue.put("round", show.get_round());
-				updateRowValue.put("alpha", show.get_sum_alpha());
-				updateRowValue.put("result", show.get_sum_result());
-				updateRowValue.put("numbers", show.get_sum_numbers());
-				updateRowValue.put("hit", show.get_sum_hit());
-				lottoDBManager.update(updateRowValue, "id=?", new String[]{cursor.getString(0)});*/
 			}
 		}
-		/*
-		Log.i("check", "main onCreate() showMyDB() after change");
-		cursor = lottoDBManager.query(columns, null, null, null, null, null);
-		while(cursor.moveToNext())
-		{
-			if(cursor != null)
-			{
-				Log.i("check", "main onCreate() showMyDB() id : " + cursor.getString(0));
-				Log.i("check", "main onCreate() showMyDB() round : " + cursor.getInt(1));
-				Log.i("check", "main onCreate() showMyDB() alpha : " + cursor.getString(2));
-				Log.i("check", "main onCreate() showMyDB() result : " + cursor.getString(3));
-				Log.i("check", "main onCreate() showMyDB() numbers : " + cursor.getString(4));
-				Log.i("check", "main onCreate() showMyDB() hit : " + cursor.getString(5));
-			}
-		}*/
 	}
 
 	private void initId()
@@ -211,12 +219,12 @@ public class MainActivity extends AppCompatActivity
 
 		intentToQR = new Intent(this, ShowQRResult.class);
 
-		refresh = findViewById(R.id.refreshImage);
+		gps = findViewById(R.id.gpsImage);
 		top_qr_Image = findViewById(R.id.top_qr_Image);
 		top_list_Image = findViewById(R.id.top_list_Image);
 		menu_qr = findViewById(R.id.menu_qr);
 		menu_list = findViewById(R.id.menu_list);
-		refresh.setOnTouchListener(mTouchEvent);
+		gps.setOnTouchListener(mTouchEvent);
 		top_qr_Image.setOnTouchListener(mTouchEvent);
 		top_list_Image.setOnTouchListener(mTouchEvent);
 	}
@@ -255,6 +263,15 @@ public class MainActivity extends AppCompatActivity
 		//checkMyDB();
 		myLatestRound = lottoDBManager.get_latestRound();
 		showMyLatestLotto();
+		Cursor arr = lottoDBManager.descendDB();
+		//round, id, alpha, result, numbers, hit
+		while(arr.moveToNext())
+		{
+			if(arr!=null)
+			{
+				Log.i("check", "main onResume() acsend " + arr.getInt(0));
+			}
+		}
 	}
 
 	@Override
@@ -304,22 +321,17 @@ public class MainActivity extends AppCompatActivity
 		//앱의 권한 확인
 		permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
 		if(permissionCheck != PackageManager.PERMISSION_GRANTED) {
-			//앱에 권한이 없는 경우
+			//카메라 사용 권한 없음
 			Toast.makeText(this, "권한 승인 필요", Toast.LENGTH_SHORT).show();
 			//사용자가 권한 거절을 한 경우 또는 처음하는 경우
+
 			if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-				/*Snackbar.make(mLayout, "이 앱을 실행하려면 카메라 접근 권한이 필요합니다.", Snackbar.LENGTH_INDEFINITE).setAction("확인", new View.OnClickListener() {
-					@Override
-					public void onClick(View view) {
-						// 3-3. 사용자게에 퍼미션 요청을 합니다. 요청 결과는 onRequestPermissionResult에서 수신됩니다.
-						ActivityCompat.requestPermissions( MainActivity.this,  new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
-					}
-				}).show();*/
+				//이전에 거절을 한 적이 있으면 true 반환
 				//권한 요청. 요청 결과는 onRequestPermissionResult에서 수신. 팝업으로 사진 촬열할지 물어봄
 				ActivityCompat.requestPermissions( MainActivity.this,  new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION);
 			}
 			else {
-				//다시 보지 않기로 거절한 경우 설정창으로 넘어가야함
+				//이전에 거절을 한 적이 있고 다시 묻지 않음 옵션을 선택 / 기기 자체 금지 - false 반환
 				AlertDialog.Builder localBuilder = new AlertDialog.Builder(this);
 				localBuilder.setTitle("권한 설정")
 						.setMessage("권한 거절로 인해 카메라 기능이 제한됩니다.")
@@ -345,6 +357,7 @@ public class MainActivity extends AppCompatActivity
 		}
 		else
 		{
+			//카메라 사용 권한 있음
 			Toast.makeText(this, "권한 승인", Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -363,7 +376,22 @@ public class MainActivity extends AppCompatActivity
 			case R.id.menu_qr:
 				qrBtnClick();
 				break;
-			case R.id.refreshImage:
+			case R.id.gpsImage://수정해야함. map 보여주는 걸로
+				this.intentToMap = new Intent(MainActivity.this, MapActivity.class);
+				/*
+				if(this.currentLocation != null)
+				{
+					Log.i("check", "MainAcitivty() intenttomain " + this.currentLocation.getLatitude() + " " + this.currentLocation.getLongitude());
+				}
+				else
+				{
+					Log.i("check", "MainAcitivty() intenttomain null");
+				}
+				this.intentToMap.putExtra("lastLocation", this.currentLocation);
+				*/
+				//intent start 바꿔
+				startActivityForResult(this.intentToMap, LAST_STATE_SAVE);//intent 보내
+				break;
 			case R.id.latestRoundText:
 				showMyLatestLotto();
 				textClick();
@@ -373,6 +401,7 @@ public class MainActivity extends AppCompatActivity
 
 	private void showClick()
 	{
+		//수정해야할 부분있는거 같음
 		Intent intentToMyInfo = new Intent(MainActivity.this, MyInfoActivity.class);
 		intentToMyInfo.putExtra("db", lottoDBManager);
 		Intent i = new Intent(MainActivity.this, MyInfoActivity.class);
@@ -395,6 +424,8 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	//회차에 따른 번호 가져와
+	//메인 화면에 제일 윗 부분
+	//혼자 작동하면 됨
 	private void getNumber(final String numberUrl)
 	{
 		Log.i("check", "main getNumber()");
@@ -459,6 +490,7 @@ public class MainActivity extends AppCompatActivity
 						}
 					});
 				}catch(Exception e){
+					Log.i("check", "main getNumber() catch : " + e.toString());
 				}
 				Looper.loop();
 			}
@@ -466,7 +498,6 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	//가장 최신 회차를 찾아
-	//앱 시작하면 자동으로 번호 찾아와
 	private void getLatestLotto()
 	{
 		Log.i("check", "main getLatestNumber()");
@@ -501,13 +532,14 @@ public class MainActivity extends AppCompatActivity
 					{
 						calDateDays -= 1;
 					}
-					getNumber(basicUrl+calDateDays);//로또 당첨 번호 가져와
+					getNumber(basicUrl+calDateDays);//로또 당첨 번호 가져와. thread 이용.
 					latestRound = (int)calDateDays;
 					//추가할 기능
 					//내가 가진건 896회인데 시간이 지나서 896회의 결과가 나옴
 					//결과를 자동으로 받아와 내 db에 있는 녀석을 업데이트해줘
 					checkMyDB();////////////////////////////////////////////////////////////////
 				}catch(ParseException e){
+					Log.i("check", "main getLatestLotto catch : " + e.toString());
 				}
 				//ui 변경
 				mHandler.post(new Runnable()
@@ -528,7 +560,7 @@ public class MainActivity extends AppCompatActivity
 	private void checkMyDB()
 	{
 		Log.i("check", "main checkMyDB()");
-		String [] columns = new String[]{"id, round, alpha, result, numbers, hit"};
+		String [] columns = new String[]{"id, round, alpha, result, numbers, hit, qORm"};
 		LottoInfo tmp = new LottoInfo();
 		Cursor cursor = lottoDBManager.query(columns, "round=" + latestRound, null, null, null, null);
 		//최근 로또를 샀을때
@@ -546,6 +578,7 @@ public class MainActivity extends AppCompatActivity
 					tmp.set_result(cursor.getString(3));
 					tmp.set_numbers(cursor.getString(4));
 					tmp.set_hit(cursor.getString(5));
+					tmp.set_qORm(cursor.getString(6));
 					jp[i] = new JsoupParse(tmp);
 					jp[i].execute();
 				}
@@ -556,7 +589,7 @@ public class MainActivity extends AppCompatActivity
 	private void showMyLatestLotto()
 	{
 		Log.i("check", "main showMyLatestLotto()");
-		String [] columns = new String[]{"id, round, alpha, result, numbers, hit"};
+		String [] columns = new String[]{"id, round, alpha, result, numbers, hit, qORm"};
 		Cursor cursor = lottoDBManager.query(columns, "round=" + myLatestRound, null, null, null, null);
 		mRecyclerView = findViewById(R.id.testLayout);
 		mRecyclerView.removeAllViews();
@@ -580,6 +613,7 @@ public class MainActivity extends AppCompatActivity
 				tmpLotto.set_result(cursor.getString(3));
 				tmpLotto.set_numbers(cursor.getString(4));
 				tmpLotto.set_hit(cursor.getString(5));
+				tmpLotto.set_qORm(cursor.getString(6));
 				mmmLottoList.add(tmpLotto);
 				mmAdapter.notifyDataSetChanged();
 			}
@@ -621,13 +655,28 @@ public class MainActivity extends AppCompatActivity
 						LottoInfo tmp = (LottoInfo)data.getSerializableExtra("lotto");
 						insertDB(tmp);
 						//getLottoData();
-						showDB();
+						showDB();//삭제???
 					}
 					break;
 				case SHOW_DB:
 					//MyInfoActivity 갔다옴
-					//수정
+					//수정??? 삭제???
 					break;
+				case LAST_STATE_SAVE:
+					//MapActivity 갖다옴
+					Log.i("check", "MapActivity 갔다옴");
+					/*
+					if(data.hasExtra("lastLocation"))
+					{
+						this.currentLocation = data.getParcelableExtra("lastLocation");
+						Log.i("check", "MapActivity 갔다옴 " + this.currentLocation.getLongitude() + " " + this.currentLocation.getLatitude());
+					}
+					else
+					{
+						Log.i("check", "MapActivity 갔다옴 location 없엉");
+					}*/
+					break;
+
 			}
 		}
 	}
@@ -645,10 +694,11 @@ public class MainActivity extends AppCompatActivity
 		addRowValue.put("result", insertLotto.get_sum_result());
 		addRowValue.put("hit", insertLotto.get_sum_hit());
 		addRowValue.put("numbers", insertLotto.get_sum_numbers());
+		addRowValue.put("qORm", insertLotto.get_qORm());
 
 		lottoDBManager.insert(addRowValue);
 
-		//myLatestRound = insertLotto.get_round();
+		//myLatestRound = insertLotto.get_round();//삭제
 	}
 
 	//데이터베이스 관련 함수. DB. 업데이트
@@ -663,10 +713,11 @@ public class MainActivity extends AppCompatActivity
 		updateRowValue.put("result", updateLotto.get_sum_result());
 		updateRowValue.put("hit", updateLotto.get_sum_hit());
 		updateRowValue.put("numbers", updateLotto.get_sum_numbers());
+		updateRowValue.put("qORm", updateLotto.get_qORm());
 		lottoDBManager.update(updateRowValue, "id=?", new String[]{updateLotto.get_id()});
 	}
 
-	//데이터베이스 관련 함수. DB. 검색
+	//데이터베이스 관련 함수. DB. 검색 // 삭제
 	private void searchDB(int round)
 	{
 
@@ -733,6 +784,7 @@ public class MainActivity extends AppCompatActivity
 		private StringBuffer sbResult = new StringBuffer();
 		private StringBuffer sbNum = new StringBuffer();
 		private StringBuffer sbHit = new StringBuffer();
+		private StringBuffer sbQorM = new StringBuffer();
 
 		private int tmpRound;
 		private int mode = 0;
@@ -778,7 +830,8 @@ public class MainActivity extends AppCompatActivity
 			myLotto.set_alpha(sbAlpha.toString());//AnBnCnDnE
 			myLotto.set_result(sbResult.toString());//낙첨n낙첨n낙첨n낙첨n낙첨
 			myLotto.set_numbers(sbNum.toString());//12341234134q12412341234q1241241234q1241241234q123412341234q1234123434
-			myLotto.set_hit(sbHit.toString());//1,2n3,4
+			myLotto.set_hit(sbHit.toString());//1,2,1n3,4,1
+			myLotto.set_qORm(sbQorM.toString());
 
 			if(this.mode == 0)
 			{
@@ -820,6 +873,7 @@ public class MainActivity extends AppCompatActivity
 				Elements lottoRow = doc.select("div[class=tbl_basic]").select("table").select("tbody").select("tr");
 				for(Element row : lottoRow)
 				{
+					int a = 1;//
 					//줄마다 정보 저장
 					//줄 번호
 					String tmpAlpha = row.select("th[scope=row]").text();//변경
@@ -842,11 +896,20 @@ public class MainActivity extends AppCompatActivity
 						else {
 							sbNum.append(num.text());
 						}
+						Log.i("check", "doInBackground class name " + num.className());
 						if(num.className().contains("clr1")||num.className().contains("clr2")||num.className().contains("clr3")||num.className().contains("clr4")||num.className().contains("clr5"))
 						{
 							//맞춘 자리 체크
-							sbHit.append(c+","+r).append("q");
+							if(num.className().contains("plus"))
+							{
+								sbHit.append(c+","+r+","+7).append("q");
+							}
+							else
+							{
+								sbHit.append(c+","+r+","+a).append("q");
+							}
 						}
+						a++;
 						r++;
 					}
 					sbAlpha.append(tmpAlpha).append("q");
@@ -857,10 +920,77 @@ public class MainActivity extends AppCompatActivity
 			}catch(IOException e){
 				Log.i("check", "doInBackground catch : " + e.toString());
 			}
-			Log.i("check", "onPostExecute sbAlpha :" + sbAlpha.toString());
-			Log.i("check", "onPostExecute sbResult :" + sbResult.toString());
-			Log.i("check", "onPostExecute sbNum :" + sbNum.toString());
+			//맨 마지막 q 삭제
+			sbAlpha.deleteCharAt(sbAlpha.length()-1);
+			sbResult.deleteCharAt(sbResult.length()-1);
+			sbNum.deleteCharAt(sbNum.length()-1);
+
+			//onPostExecute 하기 전에 제대로 다 받았나 로그 찍어봐
+			Log.i("check", "doInBackground sbAlpha :" + sbAlpha.toString());
+			Log.i("check", "doInBackground sbResult :" + sbResult.toString());
+			Log.i("check", "doInBackground sbNum :" + sbNum.toString());
+			Log.i("check", "doInBackground sbHit : " + sbHit.toString());
+
+			//주소에서 q, m  으로 자동 수동 구분함
+			String test = this.findUri.substring("https://m.dhlottery.co.kr/qr.do?method=winQr&v=".length());
+			int b = 0;
+			int d = 0;
+			while(d < 5)
+			{
+				if(test.charAt(b) == 'm' || test.charAt(b) == 'q' || test.charAt(b) == 'n')
+				{
+					sbQorM.append(test.charAt(b));
+					d++;
+				}
+				b++;
+			}
+			Log.i("check", "doInBackground qORm : " + sbQorM.toString());
 			return null;
 		}
 	}
+
+	/*
+	private void updateValuesFromBundle(Bundle savedInstanceState)
+	{
+		Log.i("check", "MainActivity updateValuesFromBundle()");
+
+		if(savedInstanceState != null)
+		{
+			if(savedInstanceState.keySet().contains(KEY_LOCATION))
+			{
+				this.currentLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+				if(this.currentLocation == null)
+				{
+					Log.i("check", "MainActivity updateValuesFromBundle() has location but null");
+				}
+				else
+				{
+					Log.i("check", "MainActivity updateValuesFromBundle() has location");
+				}
+			}
+			else
+			{
+				Log.i("check", "MainActivity updateValuesFromBundle() no location");
+				this.currentLocation = null;
+			}
+		}
+		else
+		{
+			Log.i("check", "MainActivity updateValuesFromBundle() null");
+		}
+	}
+	*/
+
+	/*
+	@Override
+	public void onSaveInstanceState(Bundle outState)
+	{//저장해야함
+		if(this.currentLocation != null)
+		{
+			Log.i("check", "MainActivity onSaveInstanceState() " + this.currentLocation.getLatitude() + " " + this.currentLocation.getLongitude());
+			outState.putParcelable(KEY_LOCATION, this.currentLocation);
+			super.onSaveInstanceState(outState);
+		}
+	}
+	*/
 }

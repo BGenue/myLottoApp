@@ -1,6 +1,7 @@
 package Project.lottoinfo;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,6 +77,11 @@ public class ShowQRResult extends AppCompatActivity
 				//row
 				setText = container.findViewById(R.id.my_lotto_rowA_alpha + i*15);
 				setText.setText(myLotto.get_row_alpha(i));
+				if(myLotto.get_qORm().charAt(i) == 'm')
+				{
+					setText.setTextColor(Color.RED);
+				}
+
 
 				//result
 				setText = container.findViewById(R.id.my_lotto_rowA_result + i*15);
@@ -86,10 +92,22 @@ public class ShowQRResult extends AppCompatActivity
 				{
 					setText = container.findViewById(R.id.my_lotto_rowA_num1_text + i*15 + j*2);
 					setText.setText(myLotto.get_number(i, j) + "");//바꿔야함 -> number
-					if(myLotto.get_hit(i, j) == 1)
+					ImageView image = container.findViewById(R.id.my_lotto_rowA_num1_image + i*15 + j*2);
+					if(myLotto.get_hit(i, j) > 0 && myLotto.get_hit(i, j) <= 2)
 					{
-						ImageView image = container.findViewById(R.id.my_lotto_rowA_num1_image + i*15 + j*2);
 						image.setImageResource(R.drawable.my_yellow_oval);
+					}
+					else if(myLotto.get_hit(i, j) == 3 || myLotto.get_hit(i, j) == 4)
+					{
+						image.setImageResource(R.drawable.my_blue_oval);
+					}
+					else if(myLotto.get_hit(i, j) == 5 || myLotto.get_hit(i, j) == 6)
+					{
+						image.setImageResource(R.drawable.my_red_oval);
+					}
+					else if(myLotto.get_hit(i, j) == 7)
+					{
+						image.setImageResource(R.drawable.my_black_oval);
 					}
 				}
 			}

@@ -18,6 +18,7 @@ public class LottoInfo implements Serializable
 	private String[] result;
 	private String[][] numbers;
 	private int[][] hit;//로또 당첨 번호랑 비교해서 맞은 애
+	private String qORm;
 
 	public LottoInfo()
 	{
@@ -45,6 +46,8 @@ public class LottoInfo implements Serializable
 	{
 		this.numbers = splitNumber(numbers);
 	}
+
+	public void set_qORm(String qm) { this.qORm =qm; }
 
 	//1234q1234q1234 => 12 34 / 12 34 / 12 34
 	private String[][] splitNumber(String n)
@@ -82,7 +85,7 @@ public class LottoInfo implements Serializable
 				String[] n = tmpH[i].split(",");
 				int x = Integer.parseInt(n[0]);
 				int y = Integer.parseInt(n[1]);
-				this.hit[x][y] = 1;
+				this.hit[x][y] = Integer.parseInt(n[2]);
 			}
 		}
 	}
@@ -97,6 +100,8 @@ public class LottoInfo implements Serializable
 	{
 		return this.hit[i][j];
 	}
+
+	public String get_qORm() { return this.qORm; }
 
 	//A / B / C / D / E
 	public String get_row_alpha(int i)
@@ -120,6 +125,7 @@ public class LottoInfo implements Serializable
 		}
 		return tmp.toString();
 	}
+
 
 	// 12 34 / 12 34 / 12 34 / 12 34 / 12 34
 	public String get_number(int i, int j)
@@ -174,13 +180,16 @@ public class LottoInfo implements Serializable
 		{
 			for(int j = 0 ; j < 6 ; j++)
 			{
-				if(this.hit[i][j] == 1)
+				if(this.hit[i][j] >= 1)
 				{
-					sb.append(i).append(",").append(j).append("q");
+					sb.append(i).append(",").append(j).append(",").append(this.hit[i][j]).append("q");
 				}
 			}
 		}
-		sb = sb.deleteCharAt(sb.length()-1);
+		if(sb.length()>0)
+		{
+			sb = sb.deleteCharAt(sb.length()-1);
+		}
 		return sb.toString();
 	}
 }

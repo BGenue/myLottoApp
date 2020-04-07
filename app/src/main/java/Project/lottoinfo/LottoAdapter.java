@@ -1,5 +1,6 @@
 package Project.lottoinfo;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.util.TypedValue;
@@ -16,7 +17,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 //adapter : view 생성
 public class LottoAdapter extends RecyclerView.Adapter<LottoAdapter.LottoViewHolder>
@@ -155,6 +155,16 @@ public class LottoAdapter extends RecyclerView.Adapter<LottoAdapter.LottoViewHol
 	{
 		Log.i("check", "LottoAdapter onBindViewHolder()");
 
+		//남아있는 변경된 정보 싹 초기화(row 보이기, 색 바꾸기)
+		for(int i = 0 ; i < 5 ; i++)
+		{
+			viewHolder.mLayout[i].setVisibility(View.GONE);
+			viewHolder.round.setTextColor(Color.parseColor("#808080"));
+			for(int j = 0 ; j < 6 ; j++)
+			{
+				viewHolder.mNumberImage[i][j].setImageResource(R.drawable.my_white_oval);
+			}
+		}
 
 		viewHolder.cLayout.setBackgroundResource(R.drawable.recycler_border);
 
@@ -164,6 +174,9 @@ public class LottoAdapter extends RecyclerView.Adapter<LottoAdapter.LottoViewHol
 		viewHolder.round.setGravity(Gravity.CENTER);
 		viewHolder.round.setText(lottoList.get(position).get_round()+"");
 		viewHolder.round.setVisibility(View.VISIBLE);
+
+		String qorm = lottoList.get(position).get_qORm();
+
 		//viewHolder.round.setHint(lottoList.get(position).get_id());///id
 		for(int i = 0 ; i < lottoList.get(position).get_len() ; i++)
 		{
@@ -178,17 +191,41 @@ public class LottoAdapter extends RecyclerView.Adapter<LottoAdapter.LottoViewHol
 			{
 				viewHolder.mNumberText[i][j].setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 				viewHolder.mNumberText[i][j].setText(lottoList.get(position).get_number(i, j));
-				if(lottoList.get(position).get_hit(i, j) == 1)
+				if(lottoList.get(position).get_hit(i, j) > 0 && lottoList.get(position).get_hit(i, j) <= 2)
 				{
 					viewHolder.mNumberImage[i][j].setImageResource(R.drawable.my_yellow_oval);
 				}
+				else if(lottoList.get(position).get_hit(i, j) == 3 ||lottoList.get(position).get_hit(i, j) == 4)
+				{
+					viewHolder.mNumberImage[i][j].setImageResource(R.drawable.my_blue_oval);
+				}
+				else if(lottoList.get(position).get_hit(i, j) == 5 || lottoList.get(position).get_hit(i, j) == 6)
+				{
+					viewHolder.mNumberImage[i][j].setImageResource(R.drawable.my_red_oval);
+				}
+				else if(lottoList.get(position).get_hit(i, j) == 7)
+				{
+					viewHolder.mNumberImage[i][j].setImageResource(R.drawable.my_black_oval);
+				}
+			}
+
+			//글자 색
+			if(qorm.charAt(i) == 'q')
+			{
+				viewHolder.mAlpha[i].setTextColor(Color.parseColor("#808080"));
+			}
+			else if(qorm.charAt(i) == 'm')
+			{
+				viewHolder.mAlpha[i].setTextColor(Color.RED);
 			}
 		}
+
 		//만일 삭제한 로또의 줄 갯수가 더 많으면 View.GONE 을 해줘야 제대로 보임
+		/*
 		for(int i = lottoList.get(position).get_len() ; i < 5 ; i++)
 		{
 			viewHolder.mLayout[i].setVisibility(View.GONE);
-		}
+		}*/
 	}
 
 	@Override

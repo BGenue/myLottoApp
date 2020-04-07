@@ -260,7 +260,7 @@
                 android:orientation="horizontal"
                 app:layout_constraintGuide_percent="0.9"/>
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/refreshLayout"
+                android:id="@+id/gpsLayout"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 app:layout_constraintBottom_toBottomOf="@+id/gd_bottom"
@@ -268,12 +268,12 @@
                 app:layout_constraintTop_toTopOf="@+id/gd_top"
                 app:layout_constraintWidth_percent="0.15">
                 <ImageView
-                    android:id="@+id/refreshImage"
+                    android:id="@+id/gpsImage"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:clickable="true"
                     android:onClick="clickHandler"
-                    android:src="@drawable/refresh"
+                    android:src="@drawable/gps"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
@@ -284,10 +284,10 @@
                 android:id="@+id/qrLayout"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="@+id/refreshLayout"
-                app:layout_constraintLeft_toRightOf="@id/refreshLayout"
+                app:layout_constraintBottom_toBottomOf="@+id/gpsLayout"
+                app:layout_constraintLeft_toRightOf="@id/gpsLayout"
                 app:layout_constraintRight_toLeftOf="@+id/listLayout"
-                app:layout_constraintTop_toTopOf="@id/refreshLayout"
+                app:layout_constraintTop_toTopOf="@id/gpsLayout"
                 app:layout_constraintWidth_percent="0.15">
 
                 <ImageView
@@ -308,9 +308,9 @@
                 android:id="@+id/listLayout"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="@id/refreshLayout"
+                app:layout_constraintBottom_toBottomOf="@id/gpsLayout"
                 app:layout_constraintRight_toRightOf="@+id/gd_right"
-                app:layout_constraintTop_toTopOf="@+id/refreshLayout"
+                app:layout_constraintTop_toTopOf="@+id/gpsLayout"
                 app:layout_constraintWidth_percent="0.15">
                 <ImageView
                     android:id="@+id/top_list_Image"

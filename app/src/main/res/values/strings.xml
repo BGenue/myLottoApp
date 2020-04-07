@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">lottoInfo</string>
+    <string name="admob_app_id">ca-app-pub-1288113500411864~6764027122</string>
+    <string name="banner_ad_unit_id">ca-app-pub-1288113500411864/2329958098</string>
+    <string name="banner_ad_unit_id_for_test">	ca-app-pub-3940256099942544/6300978111</string>
+</resources>
